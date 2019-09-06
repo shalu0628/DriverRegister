@@ -1,0 +1,156 @@
+pragma solidity ^0.5.0;
+
+contract Sep06DUber{
+    
+     uint riderCount = 0;
+    uint driverCount = 0;
+    uint ridesCount = 0;
+     uint currrides = 0;
+     uint ridescancelCount = 0;
+    
+    address owner;
+    Rider[] riderList;
+    Driver[] driverList;
+    Ride[] ridesList;
+    
+    mapping(address => uint) addressRiderIDMapping;
+    mapping(address => uint) addressDriverIDMapping;
+    
+    
+    string occupied = "occupied";
+    string available = "available";
+    
+    struct Rider{
+        address riderAddr;
+        uint riderID;
+        uint rideID;
+        string currentStatus;
+        
+    }
+    
+    struct Driver {
+        address driverAddr;
+        uint driverID;
+        uint perkm;
+        uint rideID;
+        string currentStatus;
+        
+    }
+    
+    struct Ride {
+        uint rideID;
+        uint riderID;
+        uint driverID;
+        uint totalCost;
+       // uint[] bids;
+       uint rating;
+        
+        bool rideStart;
+        bool rideFinish;
+        
+        string source;
+        string destination;
+    }
+    
+    constructor() public {
+               addressRiderIDMapping[msg.sender]=5000;
+    }
+    
+    function registerDriver(uint _perkm) public payable returns(string memory) {
+       require(addressDriverIDMapping[msg.sender] == 0,"You are already registered as Driver.");
+      
+        driverCount++;
+        driverList.push(Driver({
+            driverID : driverCount,
+            driverAddr : msg.sender,
+            rideID : 0,
+            perkm : _perkm,
+            currentStatus : available
+           
+        }));
+        addressDriverIDMapping[msg.sender] = driverCount;
+        return "You are registered as Driver.";
+    }
+    
+    function registerRider() public payable returns(string memory) {
+        require(addressRiderIDMapping[msg.sender] == 0,"You are already registered as Rider.");
+         require(addressRiderIDMapping[msg.sender]<50,"Minium funds of 50 is mandatory");
+        riderCount++;
+        riderList.push(Rider({
+            riderID : riderCount,
+            riderAddr : msg.sender,
+            rideID : 0,
+            currentStatus : available
+        }));
+        
+        addressRiderIDMapping[msg.sender] = riderCount;
+        return "You are registered as Rider.";
+    }
+    
+    function requestRide(string memory _dest, string memory _source, uint _driverId) public returns(string memory , string memory) {
+        require(addressDriverIDMapping[msg.sender] == 0,"Only Rider can request for a ride.");
+        require(addressRiderIDMapping[msg.sender] != 0 , "You are not registered as Rider.");
+        require(driverCount > 0 , "No Driver is available.");
+        
+        ridesCount++;
+        currrides++;
+        
+        ridesList.push(Ride({
+            source : _source,
+            destination : _dest,
+            riderID : addressRiderIDMapping[msg.sender],
+            driverID : _driverId,
+            rideID : ridesCount,
+            rideStart : false,
+            rideFinish : false,
+            totalCost : 0,
+            rating : 0
+        }));
+        
+       // riderList[addressRiderIDMapping[msg.sender]-1].rideID = ridesCount;
+        return("Requesting Ride ....","");
+    
+    }
+    
+     function cancelRide(string memory _dest, string memory _source, uint _driverId) public returns(string memory , string memory) {
+        require(addressDriverIDMapping[msg.sender] == 0,"Only Rider can request for a ride.");
+        
+        ridescancelCount++;
+       
+        ridesList.push(Ride({
+            source : "",
+            destination : "",
+            riderID : addressRiderIDMapping[msg.sender],
+            driverID : 0,
+            rideID : 0,
+            rideStart : false,
+            rideFinish : false,
+            totalCost : 0,
+            rating :0
+        }));
+        
+        riderList[addressRiderIDMapping[msg.sender]-1].rideID = ridesCount;
+        return("Cancelling Ride ....","");
+    
+    }
+    
+    function rateRide(string memory _dest, string memory _source, uint _driverId, uint _rideId, uint _rating) public returns(string memory , uint, uint) {
+        require(addressRiderIDMapping[msg.sender] == 0,"Only Rider can rate for a ride.");
+        
+        ridesList.push(Ride({
+            source : _source,
+            destination : _dest,
+            riderID : addressRiderIDMapping[msg.sender],
+            driverID : _driverId,
+            rideID : _rideId,
+            rideStart : false,
+            rideFinish : false,
+            totalCost : 0,
+            rating : _rating
+        }));
+        
+        //riderList[addressRiderIDMapping[msg.sender]-1].rideID = ridesCount;
+        return("Rider has given Rating for driver",_driverId, _rideId);
+    
+    }
+    
