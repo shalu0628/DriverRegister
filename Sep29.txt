@@ -1,0 +1,30 @@
+pragma solidity ^0.5.8;
+
+contract DriverRegister{
+    
+    enum CarType {mini, micro,prime}
+     
+     struct Driver{
+        string name;
+        uint phno;
+        uint licenceno;
+        bool isDriverRegistered;
+        CarType cartypes;
+        uint index;
+        address driverAddr;
+    }
+    
+    mapping(address => Driver) public driverStructs;
+    address[] public drivers;
+    
+    function registerDriver(address driverAddr, string memory _name, uint _phno, uint _licenceno, CarType _cartype) public{
+       
+        driverStructs[driverAddr].name=_name;
+        driverStructs[driverAddr].phno=_phno;
+        driverStructs[driverAddr].licenceno=_licenceno;
+        driverStructs[driverAddr].cartypes=(_cartype);
+        driverStructs[driverAddr].isDriverRegistered = true;
+        driverStructs[driverAddr].index=drivers.push(driverAddr)-1;
+        
+    }
+}
